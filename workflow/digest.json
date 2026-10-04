@@ -1,0 +1,143 @@
+{
+  "name": "OpportunityPilot Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -448,
+        -80
+      ],
+      "id": "50873056-d45f-4781-ac5d-821e29148674",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "11xxsUnu4f4w_Lbu0_sS5JhI69ZgTMmCxnDZUr2xGQaM",
+          "mode": "list",
+          "cachedResultName": "Opportunities",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11xxsUnu4f4w_Lbu0_sS5JhI69ZgTMmCxnDZUr2xGQaM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11xxsUnu4f4w_Lbu0_sS5JhI69ZgTMmCxnDZUr2xGQaM/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        -80
+      ],
+      "id": "2a1a5b16-8edf-4d69-83c2-54a33fcb21ff",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "80X7QHgATnWAgU9l",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const start = new Date();\nstart.setHours(0, 0, 0, 0);\nconst limit = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);\n\nconst rows = $input.all().filter(i => {\n  const raw = i.json.deadline || i.json.Deadline;\n  const d = new Date(raw);\n  return raw && d >= start && d <= limit;\n});\n\nif (!rows.length) {\n  return [{ json: { text: \"No deadlines in the next 7 days.\" } }];\n}\n\nconst lines = rows.map(i =>\n  `- ${i.json.company || i.json.Company}, ${i.json.role || i.json.Role} (due ${i.json.deadline || i.json.Deadline}) [${i.json.decision || i.json.Decision}]`\n);\nreturn [{ json: { text: \"Deadlines this week:\\n\" + lines.join(\"\\n\") } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        -80
+      ],
+      "id": "d669707f-8927-4095-9356-0cee6080ab9b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "chatId": "5193808521",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        -80
+      ],
+      "id": "6d460ae5-d339-499d-981a-3f711fabdbe4",
+      "name": "Send a text message",
+      "webhookId": "38788fc7-10a4-444f-9fbe-4316fcbef434",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "62aeb4d4-8fb8-4670-beb3-f3f15701f8d4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1ac119049a7a49fdb6af6c0c9bb5772eb973fd6d6f1d755bb33dde6baadcf2b3"
+  },
+  "nodeGroups": [],
+  "id": "w0dvB1MGTdmQrznx",
+  "tags": []
+}

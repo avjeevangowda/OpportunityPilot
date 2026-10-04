@@ -1,0 +1,13 @@
+Node: Basic LLM Chain ("Draft Email")
+Model: Google Gemini (flash), temperature 0.4
+
+Prompt:
+Write a short, polite application email (under 120 words) for this opportunity.
+
+Student: [Your name], 2nd year B.Tech, skills: Python, SQL, [add yours].
+Company: {{ $('Extract Details').item.json.output.company }}
+Role: {{ $('Extract Details').item.json.output.role }}
+Eligibility: {{ $('Extract Details').item.json.output.eligibility }}
+
+Start with "Dear Hiring Team," and end with the student's name. Output only the email body.
+Rules: Mention that the resume is attached. Do NOT invent skills or experience. Use only the details above.

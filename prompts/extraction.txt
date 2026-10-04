@@ -1,0 +1,14 @@
+Node: Information Extractor ("Extract Details")
+Model: Google Gemini (flash), temperature 0
+Text input: {{ $json.subject }} {{ $json.text }}
+
+System prompt:
+You extract internship and job details from emails. Today's date is {{ $now.format('yyyy-MM-dd') }}. If a deadline has no year, assume the next upcoming date. If a field is missing, leave it empty. Never guess.
+
+Attributes:
+- is_opportunity (boolean): True only if the email announces an internship or job
+- company (string): Company name
+- role (string): Job or internship title
+- deadline (string): Last date to apply, in YYYY-MM-DD format
+- eligibility (string): Who can apply (branch, year, CGPA, skills)
+- link (string): Application link, if any

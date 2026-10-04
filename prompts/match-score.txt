@@ -1,0 +1,14 @@
+Node: Information Extractor ("Match Score")
+Model: Google Gemini (flash), temperature 0
+
+Text input:
+Student profile: 2nd year B.Tech CSE, CGPA 7.5, skills: Python, SQL, HTML, CSS, JavaScript, basic machine learning. Interested in: data analytics, web development, AI/ML.
+
+Opportunity: {{ $json.output.company }}, {{ $json.output.role }}. Eligibility: {{ $json.output.eligibility }}. Deadline: {{ $json.output.deadline }}.
+
+System prompt:
+You judge whether a student should apply to an opportunity. Say Apply only if the student meets the eligibility and the skills fit. Otherwise say Skip. Keep the reason under 20 words.
+
+Attributes:
+- decision (string): Exactly "Apply" or "Skip"
+- reason (string): One short sentence explaining why

@@ -1,0 +1,614 @@
+{
+  "name": "OpportunityPilot",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "Label_2018458552506493125"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -896,
+        -208
+      ],
+      "id": "1fe1243d-6c81-406d-9867-47e67b2dc407",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wRND51NigNybzPbb",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -752,
+        0
+      ],
+      "id": "27c1643b-1d54-481a-ad39-89332edabc8a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e6ca2cbb-e144-49bb-b480-c87addde47af",
+              "leftValue": "={{ $json.output.is_opportunity }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -448,
+        -208
+      ],
+      "id": "002608cc-9c1f-4826-9278-0ecae7185a79",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        -48
+      ],
+      "id": "af27c765-98c0-4178-8f75-d74109bba8f4",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SCZEgDGBoIXlVj8O",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.subject }} {{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "is_opportunity",
+              "type": "boolean",
+              "description": "True only if the email announces an internship or job",
+              "required": true
+            },
+            {
+              "name": "company",
+              "description": "Company name"
+            },
+            {
+              "name": "role",
+              "description": "Job or internship title"
+            },
+            {
+              "name": "deadline",
+              "description": "Last date to apply, in YYYY-MM-DD format"
+            },
+            {
+              "name": "eligibility",
+              "description": "Who can apply (branch, year, CGPA, skills)"
+            },
+            {
+              "name": "link",
+              "description": "Application link, if any"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You extract internship and job details from emails. Today's date is {{ $now.format('yyyy-MM-dd') }}. If a deadline has no year, assume the next upcoming date. If a field is missing, leave it empty. Never guess."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -736,
+        -208
+      ],
+      "id": "186175eb-d4ec-42fb-b91e-b2b120bc4501",
+      "name": "Extract Details"
+    },
+    {
+      "parameters": {
+        "text": "=Student profile: 2nd year B.Tech CSE, CGPA 7.5, skills: Python, SQL, HTML, CSS, JavaScript, basic machine learning. Interested in: data analytics, web development, AI/ML.\n\nOpportunity: {{ $json.output.company }}, {{ $json.output.role }}. Eligibility: {{ $json.output.eligibility }}. Deadline: {{ $json.output.deadline }}.",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "decision",
+              "description": "Exactly \"Apply\" or \"Skip\""
+            },
+            {
+              "name": "reason",
+              "description": "One short sentence explaining why"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You judge whether a student should apply to an opportunity. Say Apply only if the student meets the eligibility and the skills fit. Otherwise say Skip. Keep the reason under 20 words."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -192,
+        -272
+      ],
+      "id": "db34c94b-5d28-4de2-8eaf-46f0410ca742",
+      "name": "Match Score"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "11xxsUnu4f4w_Lbu0_sS5JhI69ZgTMmCxnDZUr2xGQaM",
+          "mode": "list",
+          "cachedResultName": "Opportunities",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11xxsUnu4f4w_Lbu0_sS5JhI69ZgTMmCxnDZUr2xGQaM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11xxsUnu4f4w_Lbu0_sS5JhI69ZgTMmCxnDZUr2xGQaM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "company": "={{ $('Extract Details').item.json.output.company }}",
+            "role": "={{ $('Extract Details').item.json.output.role }}",
+            "eligibility": "={{ $('Extract Details').item.json.output.eligibility }}",
+            "link": "={{ $('Extract Details').item.json.output.link }}",
+            "decision": "={{ $json.output.decision }}",
+            "reason": "={{ $json.output.reason }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "role",
+              "displayName": "role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "deadline",
+              "displayName": "deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "eligibility",
+              "displayName": "eligibility",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        -272
+      ],
+      "id": "66c44c36-d581-461a-b209-b3f185a3e863",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "80X7QHgATnWAgU9l",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "sample@gmail.com",
+          "mode": "list",
+          "cachedResultName": "sample@gmail.com"
+        },
+        "start": "={{ $('Extract Details').item.json.output.deadline }}",
+        "end": "={{ $('Extract Details').item.json.output.deadline }}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "allday": "yes",
+          "summary": "=Deadline: {{ $('Extract Details').item.json.output.company }} - {{ $('Extract Details').item.json.output.role }}"
+        },
+        "remindersUi": {
+          "remindersValues": [
+            {
+              "method": "popup",
+              "minutes": 1440
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        -272
+      ],
+      "id": "777f371c-503f-4e22-af79-971693bf2fa6",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "onsSGq2Rm7zERehw",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        -64
+      ],
+      "id": "19a2a225-dfbb-4932-9ccc-09c2d3fa2dc2",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SCZEgDGBoIXlVj8O",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short, polite application email (under 120 words) for this opportunity.\n\nStudent: Jeevan, 2nd year B.Tech, skills: Python, SQL, HTML, CSS, JavaScript, basic machine learning.\nCompany: {{ $('Extract Details').item.json.output.company }}\nRole: {{ $('Extract Details').item.json.output.role }}\nEligibility: {{ $('Extract Details').item.json.output.eligibility }}\n\nStart with \"Dear Hiring Team,\" and end with the student's name. Output only the email body.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        624,
+        -272
+      ],
+      "id": "25ea5566-2029-4dfb-b932-52a648a85988",
+      "name": "Draft Email"
+    },
+    {
+      "parameters": {
+        "chatId": "5193808521",
+        "text": "=New opportunity: {{ $('Extract Details').item.json.output.company }} - {{ $('Extract Details').item.json.output.role }} Deadline: {{ $('Extract Details').item.json.output.deadline }} Decision: {{ $('Match Score').item.json.output.decision }} Reason: {{ $('Match Score').item.json.output.reason }}  Draft email: {{ $json.text }}\nDraft saved in Gmail Drafts. Review and send it yourself.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        -272
+      ],
+      "id": "1af0cc69-2a93-4b9f-84a0-e8ff9514cc08",
+      "name": "Send a text message",
+      "webhookId": "368ed7d4-d16c-450f-b3cc-3f4ecd7d41df",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Application: {{ $('Extract Details').item.json.output.company }} - {{ $('Extract Details').item.json.output.role }}",
+        "message": "={{ $('Draft Email').item.json.text }}",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "data"
+              }
+            ]
+          },
+          "sendTo": "={{ $('Gmail Trigger').item.json.from.value[0].address }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        -272
+      ],
+      "id": "27c5a82a-a044-4348-8279-e09d2308f46c",
+      "name": "Create a draft",
+      "webhookId": "4e9742e5-01a8-4d1d-a777-122ff5811546",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wRND51NigNybzPbb",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "16noQi01Gp1LgVqH2IuuqgNQchiC_MQzC",
+          "mode": "list",
+          "cachedResultName": "resume.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/16noQi01Gp1LgVqH2IuuqgNQchiC_MQzC/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1216,
+        -272
+      ],
+      "id": "36828688-223a-4e8c-a3a5-58dc9ee02211",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EOuAIKv47SR6PUh8",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Details",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Match Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Match Score",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Details": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Score": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Draft Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Draft Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Email": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "45f10b39-2fd9-4042-8f08-a19fcdc37391",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1ac119049a7a49fdb6af6c0c9bb5772eb973fd6d6f1d755bb33dde6baadcf2b3"
+  },
+  "nodeGroups": [],
+  "id": "mWIp40QjoDKnzYgE",
+  "tags": []
+}
