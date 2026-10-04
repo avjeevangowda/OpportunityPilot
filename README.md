@@ -41,11 +41,11 @@ OpportunityPilot is an n8n workflow that acts on each new placement email:
 
 ## Architecture
 
-!\[Workflow](docs/workflow.png)
+<img src="docs/workflow.png" alt="n8n workflow" width="900">
 
-!\[Data flow diagram](docs/dfd.png)
+<img src="docs/dfd.png" alt="Data flow diagram" width="900">
 
-!\[Plan mind map](docs/mindmap.png)
+<img src="docs/mindmap.png" alt="Plan mind map" width="900">
 
 
 
