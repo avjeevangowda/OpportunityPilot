@@ -84,9 +84,9 @@ OpportunityPilot/
     ├── workflow.png
     ├── dfd.png
     └── mindmap.png
+```
 
-
-## 
+ 
 
 ## How to run it
 
@@ -110,7 +110,7 @@ OpportunityPilot/
 5. **Edit the student profile** in the match-score node (skills, year, interests).
 6. **Test** with the emails in `samples/sample-emails.md`, then publish both workflows.
 
-## 
+
 
 ## Notes and limitations
 
@@ -120,7 +120,7 @@ OpportunityPilot/
 * Company names in the samples are fictional.
 * **No credentials, tokens or API keys are stored in this repository.**
 
-## 
+ 
 
 ## Future scope
 
